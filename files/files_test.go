@@ -59,3 +59,81 @@ func namesOf(infos []fs.FileInfo) []string {
 	}
 	return names
 }
+
+func TestIsImage(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{"foto.jpg", true},
+		{"paisaje.jpeg", true},
+		{"logo.png", true},
+		{"captura.PNG", true},
+		{"FOTO.JPG", true},
+		{"documento.pdf", false},
+		{"pagina.html", false},
+		{"informe.docx", false},
+		{"respaldo.jpg.bak", false},
+		{"falso.png.txt", false},
+		{"sin-extension", false},
+		{"jpg", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsImage(tt.name); got != tt.want {
+				t.Errorf("IsImage(%q) = %v, se esperaba %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestImageNamesWithTestDirectory(t *testing.T) {
+	got, err := ImageNames(filepath.Join("..", "testdata", "directorio-prueba"))
+	if err != nil {
+		t.Fatalf("ImageNames() error inesperado: %v", err)
+	}
+
+	want := []string{"captura.PNG", "foto.jpg", "logo.png", "paisaje.jpeg"}
+	if !slices.Equal(got, want) {
+		t.Errorf("ImageNames() = %v, se esperaba %v", got, want)
+	}
+}
+
+func TestImageNamesExcludesDirectories(t *testing.T) {
+	dir := t.TempDir()
+	createFile(t, filepath.Join(dir, "foto.jpg"))
+	if err := os.Mkdir(filepath.Join(dir, "album.png"), 0o755); err != nil {
+		t.Fatalf("crear subdirectorio: %v", err)
+	}
+
+	got, err := ImageNames(dir)
+	if err != nil {
+		t.Fatalf("ImageNames() error inesperado: %v", err)
+	}
+
+	want := []string{"foto.jpg"}
+	if !slices.Equal(got, want) {
+		t.Errorf("ImageNames() = %v, se esperaba %v", got, want)
+	}
+}
+
+func TestImageNamesWithoutImages(t *testing.T) {
+	dir := t.TempDir()
+	createFile(t, filepath.Join(dir, "documento.pdf"))
+
+	got, err := ImageNames(dir)
+	if err != nil {
+		t.Fatalf("ImageNames() error inesperado: %v", err)
+	}
+	if got == nil || len(got) != 0 {
+		t.Errorf("ImageNames() = %#v, se esperaba un slice vacío no nil", got)
+	}
+}
+
+func TestImageNamesNonexistentDirectory(t *testing.T) {
+	_, err := ImageNames(filepath.Join(t.TempDir(), "no-existe"))
+	if !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("ImageNames() error = %v, se esperaba fs.ErrNotExist", err)
+	}
+}
