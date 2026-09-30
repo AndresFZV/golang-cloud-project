@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galería - {{.Hostname}}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #f4f4f5; color: #18181b; }
+    header { margin-bottom: 1.5rem; }
+    h1 { margin: 0 0 .5rem; font-size: 1.75rem; }
+    .meta { margin: .25rem 0; color: #52525b; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    figure { margin: 0; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+    img { display: block; width: 100%; height: auto; }
+    figcaption { padding: .75rem; font-size: .9rem; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Galería de imágenes</h1>
+    <p class="meta">Servidor: <strong>{{.Hostname}}</strong></p>
+    <p class="meta">Directorio: {{.Directory}}</p>
+  </header>
+  <main class="grid">
+    {{range .Images}}
+    <figure>
+      <img src="{{.Src}}" alt="{{.Name}}">
+      <figcaption>{{.Name}}</figcaption>
+    </figure>
+    {{end}}
+  </main>
+</body>
+</html>

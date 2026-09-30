@@ -3,6 +3,7 @@
 package files
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/fs"
 	"os"
@@ -30,15 +31,24 @@ func List(dir string) ([]fs.FileInfo, error) {
 	return infos, nil
 }
 
+// ImageMIMEType devuelve el tipo MIME de una imagen según su extensión
+// (.jpg, .jpeg o .png), o una cadena vacía si no es una imagen soportada.
+// La comparación no distingue mayúsculas de minúsculas.
+func ImageMIMEType(name string) string {
+	switch strings.ToLower(filepath.Ext(name)) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	default:
+		return ""
+	}
+}
+
 // IsImage informa si name tiene extensión .jpg, .jpeg o .png.
 // La comparación no distingue mayúsculas de minúsculas.
 func IsImage(name string) bool {
-	switch strings.ToLower(filepath.Ext(name)) {
-	case ".jpg", ".jpeg", ".png":
-		return true
-	default:
-		return false
-	}
+	return ImageMIMEType(name) != ""
 }
 
 // ImageNames devuelve los nombres de los archivos de imagen del directorio
@@ -58,4 +68,14 @@ func ImageNames(dir string) ([]string, error) {
 	}
 
 	return names, nil
+}
+
+// ReadBase64 lee el archivo path y devuelve su contenido codificado en
+// Base64 estándar (RFC 4648).
+func ReadBase64(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("leer archivo: %w", err)
+	}
+	return base64.StdEncoding.EncodeToString(data), nil
 }
