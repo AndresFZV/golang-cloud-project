@@ -13,14 +13,14 @@ import (
 func List(dir string) ([]fs.FileInfo, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("leer directorio %q: %w", dir, err)
+		return nil, fmt.Errorf("leer directorio: %w", err)
 	}
 
 	infos := make([]fs.FileInfo, 0, len(entries))
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
-			return nil, fmt.Errorf("obtener información de %q: %w", entry.Name(), err)
+			return nil, fmt.Errorf("obtener información de archivo: %w", err)
 		}
 		infos = append(infos, info)
 	}
