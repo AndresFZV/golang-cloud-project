@@ -15,8 +15,9 @@ Desarrollo de una aplicación en Go para la gestión de imágenes, codificación
 ├── cmd/                       # Un ejecutable por paso
 │   ├── paso1-holamundo/
 │   ├── paso2-listar-actual/
-│   └── paso3-listar-directorio/
-├── files/                     # Paquete reutilizable: lectura de directorios
+│   ├── paso3-listar-directorio/
+│   └── paso4-nombres-imagenes/
+├── files/                     # Paquete reutilizable: lectura de directorios y filtrado de imágenes
 ├── testdata/
 │   └── directorio-prueba/     # Archivos de distintos formatos para pruebas
 └── docs/
@@ -133,6 +134,60 @@ error: leer directorio: open ...\no-existe: The system cannot find the file spec
 - Otros formatos: `documento.pdf`, `pagina.html`, `informe.docx`, `notas.txt`, `datos.csv`.
 - Casos límite: `respaldo.jpg.bak` y `falso.png.txt` (contienen una extensión de imagen que no es la real), `sin-extension` y `subcarpeta/` (directorio con una imagen dentro, que no debe listarse).
 
+### Paso 4: Mostrar solo los nombres de las imágenes
+
+Aplicación que muestra únicamente los nombres de los archivos de imagen (`.jpg`, `.jpeg`, `.png`) del directorio indicado, uno por línea. La identificación no distingue mayúsculas (`captura.PNG` se reconoce) y usa la extensión real del archivo (`respaldo.jpg.bak` no se reconoce). Los subdirectorios se excluyen.
+
+Ejecución:
+
+```bash
+go run ./cmd/paso4-nombres-imagenes <directorio>
+```
+
+Resultado con el directorio de prueba (4 imágenes de 12 archivos):
+
+```
+captura.PNG
+foto.jpg
+logo.png
+paisaje.jpeg
+```
+
+Sin argumento (código de salida 2):
+
+```
+error: se esperaba 1 argumento, se recibieron 0
+uso: paso4-nombres-imagenes <directorio>
+```
+
+Directorio inexistente (código de salida 1):
+
+```
+error: leer directorio: open no-existe: The system cannot find the file specified.
+```
+
+Directorio sin imágenes (`docs`): no imprime nada y termina con código 0.
+
+Pruebas unitarias:
+
+```bash
+go test -v ./files
+```
+
+Evidencia:
+
+![Ejecución del Paso 4](docs/evidencias/paso4-nombres-imagenes.png)
+
+### Paquete `files` (reutilizable)
+
+| Función | Descripción |
+|---|---|
+| `List(dir string) ([]fs.FileInfo, error)` | Entradas del directorio ordenadas por nombre |
+| `IsImage(name string) bool` | Indica si el nombre tiene extensión `.jpg`, `.jpeg` o `.png` |
+| `ImageNames(dir string) ([]string, error)` | Nombres de las imágenes del directorio, sin subdirectorios |
+
+Las funciones no imprimen nada; devuelven datos y errores.
+
 Pruebas unitarias:
 
 ```bash
@@ -163,3 +218,5 @@ Evidencia:
 - https://pkg.go.dev/os#Args
 - https://pkg.go.dev/path/filepath#Abs
 - https://go.dev/wiki/TableDrivenTests
+- https://pkg.go.dev/path/filepath#Ext
+- https://pkg.go.dev/strings#ToLower
