@@ -14,8 +14,11 @@ Desarrollo de una aplicación en Go para la gestión de imágenes, codificación
 ├── go.mod
 ├── cmd/                       # Un ejecutable por paso
 │   ├── paso1-holamundo/
-│   └── paso2-listar-actual/
+│   ├── paso2-listar-actual/
+│   └── paso3-listar-directorio/
 ├── files/                     # Paquete reutilizable: lectura de directorios
+├── testdata/
+│   └── directorio-prueba/     # Archivos de distintos formatos para pruebas
 └── docs/
     └── evidencias/            # Capturas de ejecución por paso
 ```
@@ -77,6 +80,70 @@ directorio          0 bytes  files
 archivo            60 bytes  go.mod
 ```
 
+### Paso 3: Listar archivos de un directorio especificado
+
+Aplicación que recibe la ruta de un directorio como argumento y lista sus entradas mostrando tipo, tamaño y nombre. Valida que se reciba exactamente un argumento y reporta un error si el directorio no existe.
+
+Ejecución:
+
+```bash
+go run ./cmd/paso3-listar-directorio <directorio>
+```
+
+Resultado con el directorio de prueba:
+
+```bash
+go run ./cmd/paso3-listar-directorio testdata/directorio-prueba
+```
+
+```
+archivo        446644 bytes  captura.PNG
+archivo             0 bytes  datos.csv
+archivo             0 bytes  documento.pdf
+archivo             0 bytes  falso.png.txt
+archivo       1546453 bytes  foto.jpg
+archivo             0 bytes  informe.docx
+archivo        956885 bytes  logo.png
+archivo             0 bytes  notas.txt
+archivo             0 bytes  pagina.html
+archivo         22979 bytes  paisaje.jpeg
+archivo             0 bytes  respaldo.jpg.bak
+archivo             0 bytes  sin-extension
+directorio          0 bytes  subcarpeta
+```
+
+Sin argumento (código de salida 2):
+
+```
+error: se esperaba 1 argumento, se recibieron 0
+uso: paso3-listar-directorio <directorio>
+```
+
+Directorio inexistente (código de salida 1):
+
+```
+error: leer directorio: open ...\no-existe: The system cannot find the file specified.
+```
+
+#### Directorio de prueba
+
+`testdata/directorio-prueba/` contiene 12 archivos y un subdirectorio:
+
+- Imágenes: `foto.jpg`, `paisaje.jpeg`, `logo.png`, `captura.PNG` (extensión en mayúsculas).
+- Otros formatos: `documento.pdf`, `pagina.html`, `informe.docx`, `notas.txt`, `datos.csv`.
+- Casos límite: `respaldo.jpg.bak` y `falso.png.txt` (contienen una extensión de imagen que no es la real), `sin-extension` y `subcarpeta/` (directorio con una imagen dentro, que no debe listarse).
+
+Pruebas unitarias:
+
+```bash
+go test -v ./...
+```
+
+Evidencia:
+
+![Pruebas del Paso 3](docs/evidencias/paso3-pruebas.png)
+![Ejecución del Paso 3](docs/evidencias/paso3-listar-directorio.png)
+
 Pruebas unitarias:
 
 ```bash
@@ -93,3 +160,6 @@ Evidencia:
 - https://go.dev/doc/effective_go
 - https://go.dev/doc/modules/layout
 - https://www.conventionalcommits.org/es/v1.0.0/
+- https://pkg.go.dev/os#Args
+- https://pkg.go.dev/path/filepath#Abs
+- https://go.dev/wiki/TableDrivenTests
