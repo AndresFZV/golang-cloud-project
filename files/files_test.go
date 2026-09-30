@@ -137,3 +137,51 @@ func TestImageNamesNonexistentDirectory(t *testing.T) {
 		t.Errorf("ImageNames() error = %v, se esperaba fs.ErrNotExist", err)
 	}
 }
+
+func TestImageMIMEType(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"foto.jpg", "image/jpeg"},
+		{"paisaje.jpeg", "image/jpeg"},
+		{"FOTO.JPG", "image/jpeg"},
+		{"logo.png", "image/png"},
+		{"captura.PNG", "image/png"},
+		{"documento.pdf", ""},
+		{"respaldo.jpg.bak", ""},
+		{"sin-extension", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ImageMIMEType(tt.name); got != tt.want {
+				t.Errorf("ImageMIMEType(%q) = %q, se esperaba %q", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestReadBase64(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "datos.bin")
+	if err := os.WriteFile(path, []byte("Hola mundo"), 0o644); err != nil {
+		t.Fatalf("crear archivo: %v", err)
+	}
+
+	got, err := ReadBase64(path)
+	if err != nil {
+		t.Fatalf("ReadBase64() error inesperado: %v", err)
+	}
+
+	const want = "SG9sYSBtdW5kbw=="
+	if got != want {
+		t.Errorf("ReadBase64() = %q, se esperaba %q", got, want)
+	}
+}
+
+func TestReadBase64NonexistentFile(t *testing.T) {
+	_, err := ReadBase64(filepath.Join(t.TempDir(), "no-existe.png"))
+	if !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("ReadBase64() error = %v, se esperaba fs.ErrNotExist", err)
+	}
+}
